@@ -22,7 +22,7 @@ public class SoundsHelper {
         backSound.stop();
     }
 
-    /*public static void playMosquitoSound() {
+    /*public static void playTimeToRun() {
         TimetoRun[MathUtils.random(0, TimetoRun.length - 1)].play();
     }*/
 }
