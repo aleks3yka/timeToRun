@@ -1,8 +1,9 @@
 package com.mygdx.game.view;
 
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class BaseView {
+public class BaseView extends InputAdapter {
     int x;
     int y;
     int width;

@@ -23,8 +23,8 @@ public class MenuScreen extends ScreenAdapter {
     BackgroundView backGround;
     LabelView header;
     BitmapFont headerFont;
-    GraphView graphView;
-    Graph graph;
+    //GraphView graphView;
+    //Graph graph;
     ArrayList<BaseView> view;
     long lastMove;
     int v;
@@ -38,15 +38,15 @@ public class MenuScreen extends ScreenAdapter {
                 0, Color.BLACK, true);
         view.add(new LabelView(GameSettings.width / 2, GameSettings.height*7/8,
                 "You can read this interesting meme", true, headerFont, myGame.batch));
-        graph = new Graph(5, 5, 0.4);
-        int graphWidth = 900, graphRes = 100;
-        graphView = new GraphView((GameSettings.width - graphWidth)/2,
-                (GameSettings.height - graphWidth)/2,
-                graphWidth, graphRes, myGame.batch, graph,
-                0
-        );
-        v = 0;
-        view.add(graphView);
+        //graph = new Graph(5, 5, 0.4);
+//        int graphWidth = 900, graphRes = 100;
+//        graphView = new GraphView((GameSettings.width - graphWidth)/2,
+//                (GameSettings.height - graphWidth)/2,
+//                graphWidth, graphRes, myGame.batch, graph,
+//                0
+//        );
+//        v = 0;
+//        view.add(graphView);
     }
 
     @Override
@@ -80,9 +80,10 @@ public class MenuScreen extends ScreenAdapter {
 
     void handleInput(){
         if(millis() - lastMove >= 2000){
-            v = graph.graph.get(v).get((int)(Math.random() * graph.graph.get(v).size()));
-            graphView.setv(v);
-            lastMove = millis();
+            myGame.setScreen(myGame.gameScreen);
+            //v = graph.graph.get(v).get((int)(Math.random() * graph.graph.get(v).size()));
+            //graphView.setv(v);
+            //lastMove = millis();
         }
     }
     @Override

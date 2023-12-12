@@ -23,7 +23,7 @@ public class MyGdxGame extends Game {
 		viewport = new FitViewport(GameSettings.width, GameSettings.height, orthographicCamera);
 		batch = new SpriteBatch();
 		menuScreen = new MenuScreen(this);
-		gameScreen = new GameScreen();
+		gameScreen = new GameScreen(this);
 		setScreen(menuScreen);
 	}
 
