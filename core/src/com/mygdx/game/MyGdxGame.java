@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.screens.GameScreen;
 import com.mygdx.game.screens.MenuScreen;
+import com.mygdx.game.utils.SoundsHelper;
 
 public class MyGdxGame extends Game {
 	public SpriteBatch batch;
@@ -25,6 +26,8 @@ public class MyGdxGame extends Game {
 		menuScreen = new MenuScreen(this);
 		gameScreen = new GameScreen(this);
 		setScreen(menuScreen);
+
+		SoundsHelper.playBackSound();
 	}
 
 	@Override
