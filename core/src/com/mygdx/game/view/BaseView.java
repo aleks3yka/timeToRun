@@ -21,6 +21,9 @@ public class BaseView {
         this.y = y;
         this.batch = batch;
     }
+
+    public void draw() {};
+
     public boolean isHit(int xt, int yt){
         if(xt >= x && xt <= x + width && yt >= y && yt <= y + height){
             if(clickListener != null)clickListener.onClick();
