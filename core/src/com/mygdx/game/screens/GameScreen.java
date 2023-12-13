@@ -42,12 +42,14 @@ public class GameScreen extends ScreenAdapter {
             graphView.dispose();
         }
         int graphWidth = 900, graphRes = 900;
+
         graph = new Graph(5, 5, 0.5);
         graphView = new GraphView((GameSettings.width - graphWidth)/2,
                 (GameSettings.height - graphWidth)/2,
                 graphWidth, graphRes, myGame.batch, graph,
-                0
+                GameSettings.startV
         );
+        graphView.setOnCollideListener(onCollideListener);
         Gdx.input.setInputProcessor(inputProcessor);
     }
 
@@ -65,4 +67,15 @@ public class GameScreen extends ScreenAdapter {
     public void dispose() {
         graphView.dispose();
     }
+
+    GraphView.OnCollide onCollideListener = new GraphView.OnCollide() {
+        @Override
+        public void onCollide() {
+            //System.out.println("yomayo");
+            //graphView.dispose();
+            graphView = null;
+            graph = null;
+            myGame.setScreen(myGame.menuScreen);
+        }
+    };
 }

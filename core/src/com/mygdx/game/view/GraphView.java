@@ -7,10 +7,13 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.GameSettings;
 import com.mygdx.game.graph.Graph;
+import com.mygdx.game.graph.GraphCharacter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 import java.util.TreeSet;
 
 public class GraphView extends BaseView implements Disposable {
@@ -30,6 +33,8 @@ public class GraphView extends BaseView implements Disposable {
     public static class Pos implements Cloneable {
         public double x;
         public double y;
+        public double angle;
+        public double radius;
 
         public Pos(double x, double y) {
             this.x = x;
@@ -37,7 +42,8 @@ public class GraphView extends BaseView implements Disposable {
         }
 
         Pos mul(double a) {
-            return new Pos(x * a, y * a);
+            Pos ans = new Pos(x * a, y * a);
+            return ans;
         }
 
         Pos add(Pos b) {
@@ -68,12 +74,11 @@ public class GraphView extends BaseView implements Disposable {
             return new Edge(this.a, this.b);
         }
     }
-
     Graph graph;
     Pixmap canvas;
     int v;
     boolean updating = false;
-    float updateTime = 0.6f;
+    double updateTime = GameSettings.timeOfPlayersTravel;
     long timeUpdateStart;
     ArrayList<Pos> prevState;
     TreeSet<Edge> prevEdgeArrayWhite;
@@ -82,7 +87,11 @@ public class GraphView extends BaseView implements Disposable {
     TreeSet<Edge> newEdgeArrayWhite;
     TreeSet<Edge> newEdgeArrayGrey;
     int res;
-    Color root = Color.RED;
+
+    Color colorEnemy = Color.RED;
+    Color colorPlayer = Color.CHARTREUSE;
+
+    Color root = Color.WHITE;
     Color neighbour = Color.WHITE;
     Color edgeWhite = Color.WHITE;
     Color edgeGrey = Color.GRAY;
@@ -91,8 +100,18 @@ public class GraphView extends BaseView implements Disposable {
     Texture texture;
     double angle;
     int chosen = -1;
-    int lastChosen = -1;
     ArrayList<Integer> choosing;
+    ArrayList<GraphCharacter> enemies;
+    GraphCharacter player;
+    OnCollide onCollideListener;
+
+    public void setOnCollideListener(OnCollide onCollideListener) {
+        this.onCollideListener = onCollideListener;
+    }
+    //    double rotationSpeed1 = 0.1;
+//    double rotationSpeed2 = -0.07;
+//    double theta1;
+//    double theta2;
 
     public double funk(double x) {
         return (-Math.cos(x * Math.PI) * Math.PI) / Math.PI / 2 + 0.5;
@@ -144,6 +163,8 @@ public class GraphView extends BaseView implements Disposable {
                             )
                     )
             );
+            newState.get(neighbour).angle = (double) j / neighbours.size() + 0.25;
+            newState.get(neighbour).radius = 0.2 * res;
             j++;
         }
         j = 0;
@@ -162,6 +183,8 @@ public class GraphView extends BaseView implements Disposable {
                             )
                     )
             );
+            newState.get(neighbourSecond).angle = (double) j / neighbours.size() + 0.25;
+            newState.get(neighbourSecond).radius = 0.4 * res;
             j++;
             for (Integer neighbourThird : graph.graph.get(neighbourSecond)) {
                 if (neighbours.contains(neighbourThird)) {
@@ -202,9 +225,15 @@ public class GraphView extends BaseView implements Disposable {
         newState = new ArrayList<>();
         newEdgeArrayWhite = new TreeSet<>(comparator);
         newEdgeArrayGrey = new TreeSet<>(comparator);
+//        theta1 = 0;
+//        theta2 = 0;
         for (int i = 0; i < graph.graph.size(); i++) {
             prevState.add(new Pos(-1, -1));
             newState.add(new Pos(-1, -1));
+        }
+        enemies = new ArrayList<>();
+        for (int i = 0; i < GameSettings.enemiesCount; i++){
+
         }
         choosing = new ArrayList<>();
         getNewGraph();
@@ -212,18 +241,14 @@ public class GraphView extends BaseView implements Disposable {
     }
 
     void update() {
+        graph.update();
+        if(graph.check()){
+            if(onCollideListener != null) onCollideListener.onCollide();
+        }
         canvas.setColor(background);
         canvas.fill();
         if (((double) millis() - timeUpdateStart) / 1000 >= updateTime) {
-//            for(int i = 0; i < prevState.size(); i++){
-//                System.out.println(prevState.get(i).x + " " + prevState.get(i).y);
-//                System.out.println(newState.get(i).x + " " + newState.get(i).y);
-//            }
             prevState = (ArrayList<Pos>) newState.clone();
-//            for(int i = 0; i < prevState.size(); i++){
-//                System.out.println(prevState.get(i).x + " " + prevState.get(i).y);
-//                System.out.println(newState.get(i).x + " " + newState.get(i).y);
-//            }
             prevEdgeArrayWhite = (TreeSet<Edge>) newEdgeArrayWhite.clone();
             prevEdgeArrayGrey = (TreeSet<Edge>) newEdgeArrayGrey.clone();
             updating = false;
@@ -231,15 +256,15 @@ public class GraphView extends BaseView implements Disposable {
         double t = Math.min(1.0, ((double) millis() - timeUpdateStart) / 1000 / updateTime);
         t = Math.max(0., t);
         double tFunk = funk(t);
-        System.out.println(tFunk);
+        //System.out.println(tFunk);
         ArrayList<Pos> State = new ArrayList<>(newState.size());
         for (int i = 0; i < newState.size(); i++) {
             //State.add(newState.get(i));
             if (prevState.get(i).x != -1. && newState.get(i).x != -1.) {
                 State.add
                         (
-                                prevState.get(i).mul(1 - tFunk)
-                                        .add(newState.get(i).mul(tFunk))
+                                newState.get(i).mul(tFunk)
+                                        .add(prevState.get(i).mul(1-tFunk))
                         );
             } else if (prevState.get(i).x != -1.) {
                 State.add((Pos) prevState.get(i).clone());
@@ -313,6 +338,25 @@ public class GraphView extends BaseView implements Disposable {
             }
             canvas.fillCircle((int) u.x, (int) u.y, res / 50);
         }
+        for (ArrayList<GraphCharacter> i : graph.characters){
+            for(GraphCharacter j : i){
+                if(State.get(j.wasOn).x == -1 || State.get(j.willBeOn).x == -1){
+                    continue;
+                }
+                Pos u = State.get(j.wasOn);
+                Pos v = State.get(j.willBeOn);
+                if(j.playable){
+                    canvas.setColor(colorPlayer);
+                }else{
+                    canvas.setColor(colorEnemy);
+                }
+                canvas.fillCircle(
+                        (int)((u.x)*(1-j.pos)+(v.x)*j.pos),
+                        (int)((u.y)*(1-j.pos)+(v.y)*j.pos),
+                        res/100
+                );
+            }
+        }
     }
 
     public boolean setv(int v) {
@@ -328,9 +372,11 @@ public class GraphView extends BaseView implements Disposable {
     }
 
     public void go() {
+        //Gdx.input.vibrate((int)(updateTime*1000), 255, false);
         if(updating){
             return;
         }
+        graph.player.setMove(choosing.get(chosen));
         setv(choosing.get(chosen));
     }
 
@@ -339,18 +385,17 @@ public class GraphView extends BaseView implements Disposable {
         if (texture != null) {
             texture.dispose();
         }
-        if (updating || lastChosen != chosen) {
-            update();
-            lastChosen = chosen;
-        }
+        update();
         texture = new Texture(canvas);
         batch.draw(texture, x, y, width, height);
-
     }
 
     @Override
     public void dispose() {
         texture.dispose();
         canvas.dispose();
+    }
+    public interface OnCollide{
+        public void onCollide();
     }
 }

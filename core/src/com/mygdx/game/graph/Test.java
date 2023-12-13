@@ -1,5 +1,7 @@
 package com.mygdx.game.graph;
 
+import com.mygdx.game.GameSettings;
+
 import java.util.ArrayList;
 
 public class Test {

@@ -2,13 +2,17 @@ package com.mygdx.game.graph;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 
+import com.mygdx.game.GameSettings;
+
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
 public class Graph {
     public ArrayList<ArrayList<Integer>> graph;
+    public ArrayList<ArrayList<GraphCharacter>> characters;
     int n, m;
+    public GraphCharacter player;
     int repairPos(int v){
         if(v < 0){
             v += n * m;
@@ -70,5 +74,27 @@ public class Graph {
                 lastComponent = rootI;
             }
         }
+
+        characters = new ArrayList<>();
+        for(int i = 0; i < this.n * this.m; i++){
+            characters.add(new ArrayList<GraphCharacter>());
+        }
+        for(int i = 0; i < GameSettings.enemiesCount; i++){
+            int v = (int)(random.nextDouble()*this.n*this.m);
+            characters.get(v).add(new GraphCharacter(v, GameSettings.enemySpeed * (0.7+0.6*random.nextDouble()), this, false, random));
+        }
+        int v = (int)(random.nextDouble()*this.n*this.m);
+        player = new GraphCharacter(GameSettings.startV, 1/GameSettings.timeOfPlayersTravel, this, true, random);
+        characters.get(v).add(player);
+    }
+    public void update(){
+        for(int i = 0; i < characters.size(); i++){
+            for(int j = 0; j < characters.get(i).size(); j++){
+                characters.get(i).get(j).move();
+            }
+        }
+    }
+    public boolean check(){
+        return player.collide();
     }
 }

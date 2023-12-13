@@ -79,7 +79,7 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     void handleInput(){
-        if(millis() - lastMove >= 2000){
+        if(millis() - lastMove >= 3000){
             myGame.setScreen(myGame.gameScreen);
             //v = graph.graph.get(v).get((int)(Math.random() * graph.graph.get(v).size()));
             //graphView.setv(v);
