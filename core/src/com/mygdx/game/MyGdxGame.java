@@ -27,7 +27,7 @@ public class MyGdxGame extends Game {
 		gameScreen = new GameScreen(this);
 		setScreen(menuScreen);
 
-		//SoundsHelper.playBackSound();
+		SoundsHelper.playBackSound();
 	}
 
 	@Override

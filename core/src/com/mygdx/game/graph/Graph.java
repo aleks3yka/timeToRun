@@ -81,11 +81,16 @@ public class Graph {
         }
         for(int i = 0; i < GameSettings.enemiesCount; i++){
             int v = (int)(random.nextDouble()*this.n*this.m);
-            characters.get(v).add(new GraphCharacter(v, GameSettings.enemySpeed * (0.7+0.6*random.nextDouble()), this, false, random));
+            characters.get(v).add(new GraphCharacter(v,
+                    GameSettings.enemySpeed * (0.7+0.6*random.nextDouble()),
+                    this, false, random));
         }
-        int v = (int)(random.nextDouble()*this.n*this.m);
         player = new GraphCharacter(GameSettings.startV, 1/GameSettings.timeOfPlayersTravel, this, true, random);
-        characters.get(v).add(player);
+        characters.get(GameSettings.startV).add(player);
+        int v = (int)(random.nextDouble()*this.n*this.m);
+        characters.get(v).add(new GraphSmartEnemy(v,
+                GameSettings.enemySpeed * (0.7+0.6*random.nextDouble()),
+                this, false, random));
     }
     public void update(){
         for(int i = 0; i < characters.size(); i++){

@@ -101,17 +101,15 @@ public class GraphView extends BaseView implements Disposable {
     double angle;
     int chosen = -1;
     ArrayList<Integer> choosing;
-    ArrayList<GraphCharacter> enemies;
-    GraphCharacter player;
     OnCollide onCollideListener;
-
-    public void setOnCollideListener(OnCollide onCollideListener) {
-        this.onCollideListener = onCollideListener;
-    }
     //    double rotationSpeed1 = 0.1;
 //    double rotationSpeed2 = -0.07;
 //    double theta1;
 //    double theta2;
+    public void setOnCollideListener(OnCollide onCollideListener) {
+        this.onCollideListener = onCollideListener;
+    }
+
 
     public double funk(double x) {
         return (-Math.cos(x * Math.PI) * Math.PI) / Math.PI / 2 + 0.5;
@@ -231,10 +229,6 @@ public class GraphView extends BaseView implements Disposable {
             prevState.add(new Pos(-1, -1));
             newState.add(new Pos(-1, -1));
         }
-        enemies = new ArrayList<>();
-        for (int i = 0; i < GameSettings.enemiesCount; i++){
-
-        }
         choosing = new ArrayList<>();
         getNewGraph();
         update();
@@ -348,7 +342,15 @@ public class GraphView extends BaseView implements Disposable {
                 if(j.playable){
                     canvas.setColor(colorPlayer);
                 }else{
-                    canvas.setColor(colorEnemy);
+                    if(newState.get(j.wasOn).x != -1 && prevState.get(j.willBeOn).x != -1) {
+                        canvas.setColor(colorEnemy);
+                    }else if (newState.get(j.wasOn).x != -1){
+                        canvas.setColor(colorEnemy.r, colorEnemy.g, colorEnemy.b,
+                                (float) (colorEnemy.a * t));
+                    }else{
+                        canvas.setColor(colorEnemy.r, colorEnemy.g, colorEnemy.b,
+                                (float) (colorEnemy.a * (1-t)));
+                    }
                 }
                 canvas.fillCircle(
                         (int)((u.x)*(1-j.pos)+(v.x)*j.pos),

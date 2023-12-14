@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 
 public class SoundsHelper {
-    static Music backSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/People are Laughing.mp3"));
+    static Music backSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/Chase Pulse Faster.mp3"));
 
     /*static Sound[] TimetoRun = {
             Gdx.audio.newSound(Gdx.files.internal("sounds/.mp3")),

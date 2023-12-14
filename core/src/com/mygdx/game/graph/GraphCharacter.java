@@ -53,7 +53,6 @@ public class GraphCharacter {
                         .get((int) (Math.random() * graph.graph.get(wasOn).size())));
             }
         }
-        ;
     }
 
     public void setMove(int v) {
