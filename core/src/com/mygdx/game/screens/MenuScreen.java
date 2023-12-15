@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.utils.FontHelper;
 import com.mygdx.game.GameSettings;
+import com.mygdx.game.utils.SoundsHelper;
 import com.mygdx.game.utils.TouchTrackerMenu;
 import com.mygdx.game.view.BackgroundView;
 import com.mygdx.game.MyGdxGame;
@@ -76,6 +77,7 @@ public class MenuScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        SoundsHelper.playBackMenuSound();
         Gdx.input.setInputProcessor(new TouchTrackerMenu(this));
     }
 

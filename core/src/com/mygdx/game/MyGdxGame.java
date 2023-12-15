@@ -66,8 +66,6 @@ public class MyGdxGame extends Game {
 		bigFont = FontHelper.getFont(100, font, Color.WHITE);
 		accentFont = FontHelper.getFont(50, font, Color.LIGHT_GRAY);
 		setScreen(menuScreen);
-
-		SoundsHelper.playBackSound();
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import com.mygdx.game.GameSettings;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.utils.FontHelper;
 import com.mygdx.game.utils.MemoryHelper;
+import com.mygdx.game.utils.SoundsHelper;
 import com.mygdx.game.utils.TouchTrackerMenu;
 import com.mygdx.game.view.BackgroundView;
 import com.mygdx.game.view.BaseView;
@@ -32,6 +33,7 @@ public class GameOverScreen extends ScreenAdapter{
 
     @Override
     public void show() {
+        SoundsHelper.died();
         view = new ArrayList<>();
         view.add(new LabelView(GameSettings.width / 2, 450,
                 "GAME OVER", true, myGame.veryBigFont, myGame.batch));
@@ -61,6 +63,14 @@ public class GameOverScreen extends ScreenAdapter{
             @Override
             public void onClick() {
                 myGame.setScreen(myGame.menuScreen);
+            }
+        });
+        view.add(new LabelView(1000, 200, "Restart",
+                false, myGame.normalFont, myGame.batch));
+        view.get(view.size() - 1).setClickListener(new BaseView.onClickListener() {
+            @Override
+            public void onClick() {
+                myGame.setScreen(myGame.gameScreen);
             }
         });
     }

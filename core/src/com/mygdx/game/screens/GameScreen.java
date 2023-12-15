@@ -8,6 +8,7 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.graph.Graph;
 import com.mygdx.game.graph.GraphCharacter;
 import com.mygdx.game.utils.MemoryHelper;
+import com.mygdx.game.utils.SoundsHelper;
 import com.mygdx.game.utils.TouchTrackerGame;
 import com.mygdx.game.view.BaseView;
 import com.mygdx.game.view.GraphView;
@@ -45,6 +46,8 @@ public class GameScreen extends ScreenAdapter {
     }
     @Override
     public void show() {
+        SoundsHelper.stopBackMenuSound();
+        SoundsHelper.playBackGameSound();
         if(graphView != null){
             graphView.dispose();
         }
@@ -73,6 +76,7 @@ public class GameScreen extends ScreenAdapter {
 
             @Override
             public void onCoinCollection() {
+                SoundsHelper.coinCollected();
                 coin++;
                 MemoryHelper.setScore(coin);
                 String message = coin/100000%10 + "" + coin/10000%10
@@ -101,6 +105,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
+        SoundsHelper.stopBackGameSound();
         Gdx.input.setInputProcessor(null);
     }
 
