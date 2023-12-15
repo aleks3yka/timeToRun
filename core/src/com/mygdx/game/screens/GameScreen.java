@@ -6,9 +6,12 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.GameSettings;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.graph.Graph;
+import com.mygdx.game.graph.GraphCharacter;
+import com.mygdx.game.utils.MemoryHelper;
 import com.mygdx.game.utils.TouchTrackerGame;
 import com.mygdx.game.view.BaseView;
 import com.mygdx.game.view.GraphView;
+import com.mygdx.game.view.LabelView;
 
 import java.util.ArrayList;
 
@@ -18,12 +21,12 @@ public class GameScreen extends ScreenAdapter {
     Graph graph;
     TouchTrackerGame inputProcessor;
     public GraphView graphView;
-    public GameScreen(MyGdxGame myGame){
+    int coin;
 
-        this.myGame = myGame;
+    public GameScreen(MyGdxGame myGame){
         inputProcessor = new TouchTrackerGame(this);
-        view = new ArrayList<>();
-        view.add(graphView);
+        this.myGame = myGame;
+
     }
 
     @Override
@@ -33,23 +36,61 @@ public class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(0,0,0,1);
         myGame.batch.begin();
-        graphView.draw();
+        for(int i = 0; i < view.size(); i++){
+            myGame.batch.setColor(1,1,1,1);
+            view.get(i).draw();
+        }
         myGame.batch.end();
+
     }
     @Override
     public void show() {
         if(graphView != null){
             graphView.dispose();
         }
+        coin = 0;
         int graphWidth = 900, graphRes = 900;
 
-        graph = new Graph(5, 5, 0.5);
+        graph = new Graph(0.5);
         graphView = new GraphView((GameSettings.width - graphWidth)/2,
                 (GameSettings.height - graphWidth)/2,
                 graphWidth, graphRes, myGame.batch, graph,
-                GameSettings.startV
+                GameSettings.startV, myGame
         );
+
+        view = new ArrayList<>();
+        view.add(graphView);
+        view.add(new LabelView(1405, 850, "000000",
+                false, myGame.normalFont, myGame.batch));
+        final int bestScore = MemoryHelper.loadBestScore();
+        view.add(new LabelView(20, 850, bestScore/100000%10 + "" + bestScore/10000%10
+                + "" + bestScore/1000%10
+                + "" + bestScore/100%10
+                + "" + bestScore/10%10
+                + "" + bestScore%10, false, myGame.normalFont, myGame.batch));
         graphView.setOnCollideListener(onCollideListener);
+        graphView.setOnCoin(new GraphCharacter.OnCoinCollectionListener(){
+
+            @Override
+            public void onCoinCollection() {
+                coin++;
+                MemoryHelper.setScore(coin);
+                String message = coin/100000%10 + "" + coin/10000%10
+                       + "" + coin/1000%10
+                        + "" + coin/100%10
+                        + "" + coin/10%10
+                        + "" + coin%10;
+                LabelView label = (LabelView)view.get(1);
+                label.setMessage(message);
+                int bestScore = MemoryHelper.loadBestScore();
+                if(coin > bestScore){
+                    bestScore = coin;
+                    MemoryHelper.saveBestScore(coin);
+                    label = (LabelView) view.get(2);
+                    label.setMessage(message);
+                }
+            }
+        });
         Gdx.input.setInputProcessor(inputProcessor);
     }
 
@@ -75,7 +116,7 @@ public class GameScreen extends ScreenAdapter {
             //graphView.dispose();
             graphView = null;
             graph = null;
-            myGame.setScreen(myGame.menuScreen);
+            myGame.setScreen(myGame.gameOverScreen);
         }
     };
 }

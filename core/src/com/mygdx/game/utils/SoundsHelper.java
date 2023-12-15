@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.screens.MenuScreen;
 
 public class SoundsHelper {
     static Music backSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/Chase Pulse Faster.mp3"));
@@ -14,8 +15,12 @@ public class SoundsHelper {
     };*/
 
     public static void playBackSound() {
+        backSound.setVolume(MemoryHelper.loadVolume());
         backSound.play();
         backSound.setLooping(true);
+    }
+    public static void setVolume(float a){
+        backSound.setVolume(a);
     }
 
     public static void stopPlaying() {

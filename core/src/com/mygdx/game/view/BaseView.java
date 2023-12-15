@@ -4,12 +4,12 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class BaseView extends InputAdapter {
-    int x;
+    public int x;
     int y;
-    int width;
+    public int width;
     int height;
     SpriteBatch batch;
-    ClickListener clickListener;
+    onClickListener onClickListener;
     BaseView(int x, int y, int width, int height, SpriteBatch batch){
         this.x = x;
         this.y = y;
@@ -26,16 +26,16 @@ public class BaseView extends InputAdapter {
     public void draw() {};
 
     public boolean isHit(int xt, int yt){
-        if(xt >= x && xt <= x + width && yt >= y && yt <= y + height){
-            if(clickListener != null)clickListener.onClick();
+        if(xt >= x-20 && xt <= x+20 + width && yt >= y-20 && yt <= y+20 + height){
+            if(onClickListener != null) onClickListener.onClick();
             return true;
         }
         return false;
     }
-    public void serClickListener(ClickListener clickListener){
-        this.clickListener = clickListener;
+    public void setClickListener(onClickListener onClickListener){
+        this.onClickListener = onClickListener;
     }
-    interface ClickListener{
+    public interface onClickListener {
         void onClick();
     }
 }

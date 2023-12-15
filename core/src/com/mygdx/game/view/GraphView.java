@@ -8,12 +8,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.GameSettings;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.graph.Graph;
 import com.mygdx.game.graph.GraphCharacter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Random;
 import java.util.TreeSet;
 
 public class GraphView extends BaseView implements Disposable {
@@ -74,6 +74,7 @@ public class GraphView extends BaseView implements Disposable {
             return new Edge(this.a, this.b);
         }
     }
+
     Graph graph;
     Pixmap canvas;
     int v;
@@ -91,17 +92,20 @@ public class GraphView extends BaseView implements Disposable {
     Color colorEnemy = Color.RED;
     Color colorPlayer = Color.CHARTREUSE;
 
-    Color root = Color.WHITE;
-    Color neighbour = Color.WHITE;
+    Color root = new Color((float) 86 / 255, (float) 82 / 255, (float) 88 / 255, 1);
+    Color neighbour = new Color((float) 86 / 255, (float) 82 / 255, (float) 88 / 255, 1);
     Color edgeWhite = Color.WHITE;
     Color edgeGrey = Color.GRAY;
-    Color background = Color.BLACK;
+    Color background = new Color(0, 0, 0, 0);
     Color highLighted = Color.VIOLET;
+    Color coin = Color.YELLOW;
+    MyGdxGame myGame;
     Texture texture;
     double angle;
     int chosen = -1;
     ArrayList<Integer> choosing;
     OnCollide onCollideListener;
+
     //    double rotationSpeed1 = 0.1;
 //    double rotationSpeed2 = -0.07;
 //    double theta1;
@@ -111,7 +115,11 @@ public class GraphView extends BaseView implements Disposable {
     }
 
 
-    public double funk(double x) {
+    public void setOnCoin(GraphCharacter.OnCoinCollectionListener onCoin) {
+        graph.setOnCoin(onCoin);
+    }
+
+    public double moveFunk(double x) {
         return (-Math.cos(x * Math.PI) * Math.PI) / Math.PI / 2 + 0.5;
     }
 
@@ -196,7 +204,7 @@ public class GraphView extends BaseView implements Disposable {
 
     void fromAngleToChosen() {
         chosen = (int) (
-                (((-angle) + Math.PI * 3 / 2 + Math.PI / choosing.size())%(Math.PI * 2))
+                (((angle) + Math.PI * 3 / 2 + Math.PI / choosing.size()) % (Math.PI * 2))
                         / (Math.PI * 2 / choosing.size())
         );
     }
@@ -210,11 +218,33 @@ public class GraphView extends BaseView implements Disposable {
         //System.out.println(angle + " " + chosen);
     }
 
-    public GraphView(int x, int y, int width, int res, SpriteBatch batch, Graph graph, int v) {
+    void drawEdge(ArrayList<Pos> State, int v, int u, Color color) {
+        batch.setColor(color);
+        double x = State.get(v).x * width / res, y = State.get(v).y * height / res;
+        double width = State.get(u).x * this.width / res - x,
+                height = State.get(u).y * this.height / res - y;
+        double angle = Math.atan2(height, width);
+        double len = Math.sqrt(width * width + height * height);
+        x += ((double) res / 70) * Math.cos(angle - Math.PI / 2);
+        y += ((double) res / 70) * Math.sin(angle - Math.PI / 2);
+        batch.draw(myGame.roadTexture, (float) (this.x + x), (float) (this.y + y),
+                (float) 0, (float) 0,
+                (float) len, (float) this.width / 35, 1, 1,
+                (float) (angle / Math.PI * 180), 0, 0,
+                Math.min(myGame.roadTexture.getWidth(),
+                        (int) (len * myGame.roadTexture.getHeight() * 35 / this.width)),
+                myGame.roadTexture.getHeight(),
+                false, false
+        );
+    }
+
+    public GraphView(int x, int y, int width, int res, SpriteBatch batch,
+                     Graph graph, int v, MyGdxGame myGame) {
         super(x, y, width, width, batch);
         this.graph = graph;
         this.v = v;
         this.res = res;
+        this.myGame = myGame;
         canvas = new Pixmap(this.res, this.res, Pixmap.Format.RGBA8888);
         timeUpdateStart = -1000000;
         prevState = new ArrayList<>();
@@ -231,13 +261,13 @@ public class GraphView extends BaseView implements Disposable {
         }
         choosing = new ArrayList<>();
         getNewGraph();
-        update();
+        //update();
     }
 
     void update() {
         graph.update();
-        if(graph.check()){
-            if(onCollideListener != null) onCollideListener.onCollide();
+        if (graph.check()) {
+            if (onCollideListener != null) onCollideListener.onCollide();
         }
         canvas.setColor(background);
         canvas.fill();
@@ -249,114 +279,159 @@ public class GraphView extends BaseView implements Disposable {
         }
         double t = Math.min(1.0, ((double) millis() - timeUpdateStart) / 1000 / updateTime);
         t = Math.max(0., t);
-        double tFunk = funk(t);
+        double tFunk = moveFunk(t);
         //System.out.println(tFunk);
-        ArrayList<Pos> State = new ArrayList<>(newState.size());
+        ArrayList<Pos> state = new ArrayList<>(newState.size());
         for (int i = 0; i < newState.size(); i++) {
-            //State.add(newState.get(i));
+            //state.add(newState.get(i));
             if (prevState.get(i).x != -1. && newState.get(i).x != -1.) {
-                State.add
+                state.add
                         (
                                 newState.get(i).mul(tFunk)
-                                        .add(prevState.get(i).mul(1-tFunk))
+                                        .add(prevState.get(i).mul(1 - tFunk))
                         );
             } else if (prevState.get(i).x != -1.) {
-                State.add((Pos) prevState.get(i).clone());
+                state.add((Pos) prevState.get(i).clone());
             } else if (newState.get(i).x != -1.) {
-                State.add((Pos) newState.get(i).clone());
+                state.add((Pos) newState.get(i).clone());
             } else {
-                State.add(new Pos(-1, -1));
+                state.add(new Pos(-1, -1));
             }
         }
         for (Edge a : newEdgeArrayGrey) {
-            Pos v = State.get(a.a), u = State.get(a.b);
             if (prevEdgeArrayGrey.contains(a)) {
-                canvas.setColor(edgeGrey);
+                drawEdge(state, a.a, a.b, edgeGrey);
             } else if (prevEdgeArrayWhite.contains(a)) {
-                canvas.setColor((float) (edgeGrey.r * t + edgeWhite.r * (1 - t)),
+                drawEdge(state, a.a, a.b, new Color((float) (edgeGrey.r * t + edgeWhite.r * (1 - t)),
                         (float) (edgeGrey.g * t + edgeWhite.g * (1 - t)),
                         (float) (edgeGrey.b * t + edgeWhite.b * (1 - t)),
                         (float) (edgeGrey.a * t + edgeWhite.a * (1 - t))
-                );
+                ));
             } else {
-                canvas.setColor(edgeGrey.r, edgeGrey.g, edgeGrey.b, (float) (edgeGrey.a * t));
+                drawEdge(state, a.a, a.b, new Color(
+                        edgeGrey.r,
+                        edgeGrey.g,
+                        edgeGrey.b,
+                        (float) (edgeGrey.a * t)
+                ));
             }
-            canvas.drawLine((int) v.x, (int) v.y, (int) u.x, (int) u.y);
         }
         for (Edge a : prevEdgeArrayGrey) {
-            Pos v = State.get(a.a), u = State.get(a.b);
             if (!newEdgeArrayGrey.contains(a) && !newEdgeArrayWhite.contains(a)) {
-                canvas.setColor(edgeGrey.r, edgeGrey.g, edgeGrey.b, (float) (edgeGrey.a * (1 - t)));
-                canvas.drawLine((int) v.x, (int) v.y, (int) u.x, (int) u.y);
+                drawEdge(state, a.a, a.b, new Color(edgeGrey.r,
+                        edgeGrey.g,
+                        edgeGrey.b,
+                        (float) (edgeGrey.a * (1 - t)
+                        )));
             }
         }
         for (Edge a : newEdgeArrayWhite) {
-            Pos v = State.get(a.a), u = State.get(a.b);
             if (prevEdgeArrayWhite.contains(a)) {
-                canvas.setColor(edgeWhite);
+                drawEdge(state, a.a, a.b, edgeWhite);
             } else if (prevEdgeArrayGrey.contains(a)) {
-                canvas.setColor((float) (edgeGrey.r * (1 - t) + edgeWhite.r * t),
-                        (float) (edgeGrey.g * (1 - t) + edgeWhite.g * t),
-                        (float) (edgeGrey.b * (1 - t) + edgeWhite.b * t),
-                        (float) (edgeGrey.a * (1 - t) + edgeWhite.a * t)
+                drawEdge(state, a.a, a.b, new Color(
+                                (float) (edgeGrey.r * (1 - t) + edgeWhite.r * t),
+                                (float) (edgeGrey.g * (1 - t) + edgeWhite.g * t),
+                                (float) (edgeGrey.b * (1 - t) + edgeWhite.b * t),
+                                (float) (edgeGrey.a * (1 - t) + edgeWhite.a * t)
+                        )
                 );
             } else {
-                canvas.setColor(edgeWhite.r, edgeWhite.g, edgeWhite.b, (float) (edgeWhite.a * t));
+                drawEdge(state, a.a, a.b, new Color(
+                        edgeWhite.r,
+                        edgeWhite.g,
+                        edgeWhite.b,
+                        (float) (edgeWhite.a * t)
+                ));
             }
-            canvas.drawLine((int) v.x, (int) v.y, (int) u.x, (int) u.y);
         }
         for (Edge a : prevEdgeArrayWhite) {
-            Pos v = State.get(a.a), u = State.get(a.b);
             if (!newEdgeArrayWhite.contains(a) && !newEdgeArrayGrey.contains(a)) {
-                canvas.setColor(edgeWhite.r, edgeWhite.g, edgeWhite.b, (float) (edgeWhite.a * (1 - t)));
-                canvas.drawLine((int) v.x, (int) v.y, (int) u.x, (int) u.y);
+                drawEdge(state, a.a, a.b, new Color(
+                        edgeWhite.r,
+                        edgeWhite.g,
+                        edgeWhite.b,
+                        (float) (edgeWhite.a * (1 - t))));
             }
         }
-        for (int i = 0; i < State.size(); i++) {
-            Pos u = State.get(i);
-            if (State.get(i).x == -1.) {
+        for (int i = 0; i < state.size(); i++) {
+            //System.out.println("t: " + t);
+            Pos u = state.get(i);
+            if (state.get(i).x == -1.) {
                 continue;
             }
-            if (i == v) {
-                canvas.setColor(root);
-                //System.out.println(u.x + " " + u.y);
-                //System.out.println(newState.get(v).x + " " + newState.get(v).y);
-            } else if (choosing.size() != 0 && chosen != -1 && i == choosing.get(chosen)) {
-                canvas.setColor(highLighted);
+            if (choosing.size() != 0 && chosen != -1 && i == choosing.get(chosen)) {
+                batch.setColor(highLighted);
             } else if (prevState.get(i).x != -1 && newState.get(i).x != -1) {
-                canvas.setColor(neighbour);
+                batch.setColor(Color.WHITE);
             } else if (prevState.get(i).x != -1) {
-                canvas.setColor(neighbour.r, neighbour.g, neighbour.b, (float) (neighbour.a * (1 - t)));
+                batch.setColor(1, 1, 1, (float) (1 - t));
             } else {
-                canvas.setColor(neighbour.r, neighbour.g, neighbour.b, (float) (neighbour.a * (t)));
+                batch.setColor(1, 1, 1, (float) (t));
             }
-            canvas.fillCircle((int) u.x, (int) u.y, res / 50);
+            float mull = 4;
+            batch.draw(myGame.boulderTexture,
+                    (float) (x + u.x - (float)myGame.boulderTexture.getWidth()*mull/2),
+                    (float) (y + u.y - (float)myGame.boulderTexture.getHeight()*mull/2),
+                    (float) (myGame.boulderTexture.getWidth()*mull),
+                    (float) (myGame.boulderTexture.getHeight()*mull)
+                    );
         }
-        for (ArrayList<GraphCharacter> i : graph.characters){
-            for(GraphCharacter j : i){
-                if(State.get(j.wasOn).x == -1 || State.get(j.willBeOn).x == -1){
+        texture = new Texture(canvas);
+        batch.setColor(1, 1, 1, 1);
+        batch.draw(texture, x, y, width, height);
+        for (ArrayList<GraphCharacter> i : graph.characters) {
+            for (GraphCharacter j : i) {
+                if (state.get(j.wasOn).x == -1 || state.get(j.willBeOn).x == -1) {
                     continue;
                 }
-                Pos u = State.get(j.wasOn);
-                Pos v = State.get(j.willBeOn);
-                if(j.playable){
-                    canvas.setColor(colorPlayer);
-                }else{
-                    if(newState.get(j.wasOn).x != -1 && prevState.get(j.willBeOn).x != -1) {
-                        canvas.setColor(colorEnemy);
-                    }else if (newState.get(j.wasOn).x != -1){
-                        canvas.setColor(colorEnemy.r, colorEnemy.g, colorEnemy.b,
-                                (float) (colorEnemy.a * t));
-                    }else{
-                        canvas.setColor(colorEnemy.r, colorEnemy.g, colorEnemy.b,
-                                (float) (colorEnemy.a * (1-t)));
+                Pos u = state.get(j.wasOn);
+                Pos v = state.get(j.willBeOn);
+                if (j.playable) {
+                    batch.setColor(Color.WHITE);
+                    if (j.moving) {
+                        j.animationFrames = myGame.playerMoving.draw(
+                                (int) (this.x + (u.x) * (1 - j.pos) + (v.x) * j.pos),
+                                (int) (this.y + ((u.y) * (1 - j.pos) + (v.y) * j.pos)),
+                                j.animationFrames, u.x > v.x
+                        );
+                    } else {
+                        j.animationFrames = myGame.playerIdling.draw(
+                                this.x + (int) ((u.x) * (1 - j.pos) + (v.x) * j.pos),
+                                this.y + (int) (((u.y) * (1 - j.pos) + (v.y) * j.pos)),
+                                j.animationFrames, false
+                        );
                     }
+                    canvas.setColor(0, 0, 0, 0);
+                } else if (j.coin) {
+                    if (newState.get(j.wasOn).x != -1 && prevState.get(j.willBeOn).x != -1) {
+                        batch.setColor(Color.WHITE);
+                    } else if (newState.get(j.wasOn).x != -1) {
+                        batch.setColor(1, 1, 1,
+                                (float) (t));
+                    } else {
+                        batch.setColor(1, 1, 1,
+                                (float) (1 - t));
+                    }
+                    j.animationFrames = myGame.coin.draw((int) (state.get(j.wasOn).x+this.x),
+                            (int) (state.get(j.wasOn).y+this.y),
+                            j.animationFrames, false);
+                } else {
+                    if (newState.get(j.wasOn).x != -1 && prevState.get(j.willBeOn).x != -1) {
+                        batch.setColor(Color.WHITE);
+                    } else if (newState.get(j.wasOn).x != -1) {
+                        batch.setColor(1, 1, 1,
+                                (float) (t));
+                    } else {
+                        batch.setColor(1, 1, 1,
+                                (float) (1 - t));
+                    }
+                    j.animationFrames = myGame.enemyMoving.get(j.numOfAnimation).draw(
+                            (int) (this.x + (u.x) * (1 - j.pos) + (v.x) * j.pos),
+                            (int) (this.y + ((u.y) * (1 - j.pos) + (v.y) * j.pos)),
+                            j.animationFrames, u.x > v.x
+                    );
                 }
-                canvas.fillCircle(
-                        (int)((u.x)*(1-j.pos)+(v.x)*j.pos),
-                        (int)((u.y)*(1-j.pos)+(v.y)*j.pos),
-                        res/100
-                );
             }
         }
     }
@@ -375,7 +450,7 @@ public class GraphView extends BaseView implements Disposable {
 
     public void go() {
         //Gdx.input.vibrate((int)(updateTime*1000), 255, false);
-        if(updating){
+        if (updating) {
             return;
         }
         graph.player.setMove(choosing.get(chosen));
@@ -388,8 +463,7 @@ public class GraphView extends BaseView implements Disposable {
             texture.dispose();
         }
         update();
-        texture = new Texture(canvas);
-        batch.draw(texture, x, y, width, height);
+        myGame.batch.setColor(1, 1, 1, 1);
     }
 
     @Override
@@ -397,7 +471,8 @@ public class GraphView extends BaseView implements Disposable {
         texture.dispose();
         canvas.dispose();
     }
-    public interface OnCollide{
+
+    public interface OnCollide {
         public void onCollide();
     }
 }

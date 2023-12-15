@@ -9,8 +9,9 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class GraphSmartEnemy extends GraphCharacter{
-    public GraphSmartEnemy(int wasOn, double speed, Graph graph, boolean playable, Random random) {
-        super(wasOn, speed, graph, false, random);
+    public GraphSmartEnemy(int wasOn, double speed, Graph graph,
+                           boolean playable, Integer nextId, int numOfAnimation) {
+        super(wasOn, speed, graph, false, nextId, false, numOfAnimation);
     }
     int bfs(){
         int end = graph.player.willBeOn;
@@ -37,9 +38,9 @@ public class GraphSmartEnemy extends GraphCharacter{
         }
         int ans = end;
         while (parent.get(ans) != wasOn && ans != wasOn){
-            System.out.println(ans);
+            //System.out.println(ans);
             ans = parent.get(ans);
-            System.out.println(ans);
+            //System.out.println(ans);
         }
         return ans;
     }
@@ -58,6 +59,7 @@ public class GraphSmartEnemy extends GraphCharacter{
             delete();
             wasOn = willBeOn;
             pos = 0;
+            speed *= 1.005;
             graph.characters.get(wasOn).add(this);
             int to = bfs();
             if (to != wasOn) {

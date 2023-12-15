@@ -30,7 +30,7 @@ public class TouchTrackerGame extends InputAdapter {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (pointer != 0) {
+        if (pointer != 0 || touchedDown.x == -1) {
             return super.touchDragged(screenX, screenY, pointer);
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
@@ -46,12 +46,13 @@ public class TouchTrackerGame extends InputAdapter {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (pointer != 0) {
+        if (pointer != 0 || touchedDown.x == -1) {
             return super.touchUp(screenX, screenY, pointer, button);
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
         touch = screen.myGame.orthographicCamera.unproject(touch);
         double angle = Math.atan2((touch.y - touchedDown.y), (touch.x - touchedDown.x));
+        touchedDown = new GraphView.Pos(-1, -1);
         //angle -= Math.PI/2;
 //        System.out.println("x, y: " + (touch.x - touchedDown.x) + " " +(touch.y - touchedDown.y)
 //                + " angle: " + angle/2/Math.PI*360
