@@ -22,7 +22,7 @@ public class TouchTrackerGame extends InputAdapter {
             return super.touchDown(screenX, screenY, pointer, button);
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
-        touch = screen.myGame.orthographicCamera.unproject(touch);
+        touch = screen.myGame.viewport.unproject(touch);
         touchedDown.x = touch.x;
         touchedDown.y = touch.y;
         return super.touchDown(screenX, screenY, pointer, button);
@@ -34,7 +34,7 @@ public class TouchTrackerGame extends InputAdapter {
             return super.touchDragged(screenX, screenY, pointer);
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
-        touch = screen.myGame.orthographicCamera.unproject(touch);
+        touch = screen.myGame.viewport.unproject(touch);
         double angle = Math.atan2((touch.y - touchedDown.y), (touch.x - touchedDown.x));
         //angle -= Math.PI/2;
         screen.graphView.setAngle(angle);
@@ -50,7 +50,7 @@ public class TouchTrackerGame extends InputAdapter {
             return super.touchUp(screenX, screenY, pointer, button);
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
-        touch = screen.myGame.orthographicCamera.unproject(touch);
+        touch = screen.myGame.viewport.unproject(touch);
         double angle = Math.atan2((touch.y - touchedDown.y), (touch.x - touchedDown.x));
         touchedDown = new GraphView.Pos(-1, -1);
         //angle -= Math.PI/2;

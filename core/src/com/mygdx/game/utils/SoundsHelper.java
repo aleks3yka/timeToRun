@@ -5,7 +5,9 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 
 public class SoundsHelper {
-    static Music backGameSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/People are Laughing.mp3"));
+    static Music backGameSound = Gdx.audio.newMusic(Gdx.files.internal(
+            "sounds/y2mate_is_The_binding_of_Isaac_OST_Basement_theme_izHxUkF4ZAQ_192k.mp3"
+    ));
     static Music backMenuSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/Noise.mp3"));
     static Sound loose = Gdx.audio.newSound(Gdx.files.internal("sounds/mixkit-8-bit-lose-2031.wav"));
     static Sound getCoin = Gdx.audio.newSound(
@@ -48,16 +50,18 @@ public class SoundsHelper {
 
     public static void coinCollected() {
         long id = getCoin.play();
-        getCoin.setVolume(id, MemoryHelper.loadVolume()*0.2f);
+        getCoin.setVolume(id, MemoryHelper.loadVolume()*0.3f);
     }
 
     public static void died() {
         long id = loose.play();
+        backGameSound.pause();
         loose.setVolume(id, MemoryHelper.loadVolume());
     }
 
     public static void setVolume(float a) {
         backGameSound.setVolume(a);
+        backMenuSound.setVolume(a);
     }
 
     public static void stopPlaying() {

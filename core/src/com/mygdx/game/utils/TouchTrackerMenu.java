@@ -18,7 +18,7 @@ public class TouchTrackerMenu extends InputAdapter {
             return false;
         }
         Vector3 touch = new Vector3(screenX, screenY, 0);
-        touch = screen.myGame.orthographicCamera.unproject(touch);
+        touch = screen.myGame.viewport.unproject(touch);
         for(int i = 0; i < screen.view.size(); i++){
             screen.view.get(i).isHit((int)touch.x, (int)touch.y);
         }

@@ -17,7 +17,8 @@ public class TouchTrackerSettings extends InputAdapter {
         }
 
         Vector3 vector = new Vector3(screenX, screenY, 0);
-        vector = screen.myGame.orthographicCamera.unproject(vector);
+        vector = screen.myGame.viewport.unproject(vector);
+        System.out.println(vector.x + " " + vector.y);
 
         for(int i = 0; i < screen.view.size(); i++){
             screen.view.get(i).isHit((int)vector.x, (int)vector.y);
@@ -29,8 +30,9 @@ public class TouchTrackerSettings extends InputAdapter {
             newX = (int) Math.min(screen.sliderView.x + screen.sliderView.stickImage.width
                     - screen.sliderView.pointerImage.width, newX);
             newX = (int) Math.max(screen.sliderView.x, newX);
-
             screen.sliderView.pointerImage.x = newX;
+            SoundsHelper.setVolume(screen.sliderView.getValue());
+            MemoryHelper.saveVolume(screen.sliderView.getValue());
         }
         return super.touchDown(screenX, screenY, pointer, button);
     }
@@ -41,7 +43,7 @@ public class TouchTrackerSettings extends InputAdapter {
             return super.touchDragged(screenX, screenY, pointer);
         }
         Vector3 vector = new Vector3(screenX, screenY, 0);
-        vector = screen.myGame.orthographicCamera.unproject(vector);
+        vector = screen.myGame.viewport.unproject(vector);
         if (screen.sliderView.isDragging) {
             int newX = (int) (vector.x - screen.sliderView.pointerImage.width / 2.);
             newX = (int) Math.min(screen.sliderView.x + screen.sliderView.stickImage.width
@@ -60,7 +62,7 @@ public class TouchTrackerSettings extends InputAdapter {
             return super.touchUp(screenX, screenY, pointer, button);
         }
         Vector3 vector = new Vector3(screenX, screenY, 0);
-        vector = screen.myGame.orthographicCamera.unproject(vector);
+        vector = screen.myGame.viewport.unproject(vector);
         if (screen.sliderView.isDragging) {
             int newX = (int) (vector.x - screen.sliderView.pointerImage.width / 2.);
             newX = (int) Math.min(screen.sliderView.x + screen.sliderView.stickImage.width

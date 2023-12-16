@@ -34,6 +34,7 @@ public class GameOverScreen extends ScreenAdapter{
     @Override
     public void show() {
         SoundsHelper.died();
+        SoundsHelper.setVolume(0);
         view = new ArrayList<>();
         view.add(new LabelView(GameSettings.width / 2, 450,
                 "GAME OVER", true, myGame.veryBigFont, myGame.batch));
@@ -92,7 +93,7 @@ public class GameOverScreen extends ScreenAdapter{
         if(Gdx.input.justTouched()){
             Vector3 touch = new Vector3(Gdx.input.getX(0),
                     Gdx.input.getY(0), 0);
-            touch = myGame.orthographicCamera.unproject(touch);
+            touch = myGame.viewport.unproject(touch);
             for(int i = 0; i < view.size(); i++){
                 view.get(i).isHit((int) touch.x, (int) touch.y);
             }

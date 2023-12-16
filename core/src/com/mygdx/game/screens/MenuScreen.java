@@ -77,6 +77,7 @@ public class MenuScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        SoundsHelper.stopBackGameSound();
         SoundsHelper.playBackMenuSound();
         Gdx.input.setInputProcessor(new TouchTrackerMenu(this));
     }

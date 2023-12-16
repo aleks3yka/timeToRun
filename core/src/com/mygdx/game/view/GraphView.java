@@ -35,6 +35,7 @@ public class GraphView extends BaseView implements Disposable {
         public double y;
         public double angle;
         public double radius;
+        public int circle;
 
         public Pos(double x, double y) {
             this.x = x;
@@ -52,7 +53,10 @@ public class GraphView extends BaseView implements Disposable {
 
         @Override
         protected Object clone() {
-            return new Pos(x, y);
+            Pos a = new Pos(x, y);
+            a.angle = angle;
+            a.radius = radius;
+            return a;
         }
     }
 
@@ -106,10 +110,11 @@ public class GraphView extends BaseView implements Disposable {
     ArrayList<Integer> choosing;
     OnCollide onCollideListener;
 
-    //    double rotationSpeed1 = 0.1;
-//    double rotationSpeed2 = -0.07;
-//    double theta1;
-//    double theta2;
+    double rotationSpeed1 = 0.1;
+    double rotationSpeed2 = -0.07;
+    double theta1;
+    double theta2;
+
     public void setOnCollideListener(OnCollide onCollideListener) {
         this.onCollideListener = onCollideListener;
     }
@@ -169,8 +174,9 @@ public class GraphView extends BaseView implements Disposable {
                             )
                     )
             );
-            newState.get(neighbour).angle = (double) j / neighbours.size() + 0.25;
+            newState.get(neighbour).angle = ((double) j / neighbours.size() + 0.25) * Math.PI * 2;
             newState.get(neighbour).radius = 0.2 * res;
+            newState.get(neighbour).circle = 1;
             j++;
         }
         j = 0;
@@ -189,8 +195,9 @@ public class GraphView extends BaseView implements Disposable {
                             )
                     )
             );
-            newState.get(neighbourSecond).angle = (double) j / neighbours.size() + 0.25;
+            newState.get(neighbourSecond).angle = ((double) j / neighboursSecond.size() + 0.25) * Math.PI * 2;
             newState.get(neighbourSecond).radius = 0.4 * res;
+            newState.get(neighbourSecond).circle = 2;
             j++;
             for (Integer neighbourThird : graph.graph.get(neighbourSecond)) {
                 if (neighbours.contains(neighbourThird)) {
@@ -203,8 +210,11 @@ public class GraphView extends BaseView implements Disposable {
     }
 
     void fromAngleToChosen() {
+        if(angle <= -7){
+            return;
+        }
         chosen = (int) (
-                (((angle) + Math.PI * 3 / 2 + Math.PI / choosing.size()) % (Math.PI * 2))
+                (((angle - theta1 + Math.PI*2) + Math.PI * 3 / 2 + Math.PI / choosing.size()) % (Math.PI * 2))
                         / (Math.PI * 2 / choosing.size())
         );
     }
@@ -253,8 +263,9 @@ public class GraphView extends BaseView implements Disposable {
         newState = new ArrayList<>();
         newEdgeArrayWhite = new TreeSet<>(comparator);
         newEdgeArrayGrey = new TreeSet<>(comparator);
-//        theta1 = 0;
-//        theta2 = 0;
+        theta1 = 0;
+        theta2 = 0;
+        angle = -10;
         for (int i = 0; i < graph.graph.size(); i++) {
             prevState.add(new Pos(-1, -1));
             newState.add(new Pos(-1, -1));
@@ -265,6 +276,19 @@ public class GraphView extends BaseView implements Disposable {
     }
 
     void update() {
+        theta1 += rotationSpeed1 / 60;
+        theta2 += rotationSpeed2 / 60;
+        fromAngleToChosen();
+        if (theta1 < 0) {
+            theta1 += 2 * Math.PI;
+        } else if (theta1 >= 2 * Math.PI) {
+            theta1 -= 2 * Math.PI;
+        }
+        if (theta2 < 0) {
+            theta2 += 2 * Math.PI;
+        } else if (theta2 >= 2 * Math.PI) {
+            theta2 -= 2 * Math.PI;
+        }
         graph.update();
         if (graph.check()) {
             if (onCollideListener != null) onCollideListener.onCollide();
@@ -282,18 +306,60 @@ public class GraphView extends BaseView implements Disposable {
         double tFunk = moveFunk(t);
         //System.out.println(tFunk);
         ArrayList<Pos> state = new ArrayList<>(newState.size());
+        ArrayList<Pos> preNewState = new ArrayList<Pos>(newState.size());
+        ArrayList<Pos> prePrevState = new ArrayList<Pos>(prevState.size());
         for (int i = 0; i < newState.size(); i++) {
+            if (newState.get(i).x == -1) {
+                preNewState.add(new Pos(-1, -1));
+            }else if (newState.get(i).circle == 1) {
+                preNewState.add(new Pos(
+                        (double)width/2 + newState.get(i).radius
+                                * Math.cos(newState.get(i).angle + theta1),
+                        (double)height/2 + newState.get(i).radius
+                                * Math.sin(newState.get(i).angle + theta1)));
+            } else if (newState.get(i).circle == 2) {
+                preNewState.add(new Pos(
+                        (double)width/2 + newState.get(i).radius
+                                * Math.cos(newState.get(i).angle + theta2),
+                        (double)height/2 + newState.get(i).radius
+                                * Math.sin(newState.get(i).angle + theta2))
+                );
+            } else {
+               preNewState.add(new Pos(newState.get(i).x, newState.get(i).y));
+            }
+        }
+        for (int i = 0; i < prevState.size(); i++) {
+            if (prevState.get(i).x == -1) {
+                prePrevState.add(new Pos(-1, -1));
+            } else if (prevState.get(i).circle == 1) {
+                prePrevState.add(new Pos(
+                        (double)width/2 + prevState.get(i).radius
+                                * Math.cos(prevState.get(i).angle + theta1),
+                        (double)height/2 + prevState.get(i).radius
+                                * Math.sin(prevState.get(i).angle + theta1)));
+            } else if (prevState.get(i).circle == 2) {
+                prePrevState.add(new Pos(
+                        (double)width/2 + prevState.get(i).radius
+                                * Math.cos(prevState.get(i).angle + theta2),
+                        (double)height/2 + prevState.get(i).radius
+                                * Math.sin(prevState.get(i).angle + theta2))
+                );
+            } else {
+                prePrevState.add(new Pos(prevState.get(i).x, prevState.get(i).y));
+            }
+        }
+        for (int i = 0; i < preNewState.size(); i++) {
             //state.add(newState.get(i));
-            if (prevState.get(i).x != -1. && newState.get(i).x != -1.) {
+            if (prePrevState.get(i).x != -1. && preNewState.get(i).x != -1.) {
                 state.add
                         (
-                                newState.get(i).mul(tFunk)
-                                        .add(prevState.get(i).mul(1 - tFunk))
+                                preNewState.get(i).mul(tFunk)
+                                        .add(prePrevState.get(i).mul(1 - tFunk))
                         );
-            } else if (prevState.get(i).x != -1.) {
-                state.add((Pos) prevState.get(i).clone());
-            } else if (newState.get(i).x != -1.) {
-                state.add((Pos) newState.get(i).clone());
+            } else if (prePrevState.get(i).x != -1.) {
+                state.add((Pos) prePrevState.get(i).clone());
+            } else if (preNewState.get(i).x != -1.) {
+                state.add((Pos) preNewState.get(i).clone());
             } else {
                 state.add(new Pos(-1, -1));
             }
@@ -371,11 +437,11 @@ public class GraphView extends BaseView implements Disposable {
             }
             float mull = 4;
             batch.draw(myGame.boulderTexture,
-                    (float) (x + u.x - (float)myGame.boulderTexture.getWidth()*mull/2),
-                    (float) (y + u.y - (float)myGame.boulderTexture.getHeight()*mull/2),
-                    (float) (myGame.boulderTexture.getWidth()*mull),
-                    (float) (myGame.boulderTexture.getHeight()*mull)
-                    );
+                    (float) (x + u.x - (float) myGame.boulderTexture.getWidth() * mull / 2),
+                    (float) (y + u.y - (float) myGame.boulderTexture.getHeight() * mull / 2),
+                    (float) (myGame.boulderTexture.getWidth() * mull),
+                    (float) (myGame.boulderTexture.getHeight() * mull)
+            );
         }
         texture = new Texture(canvas);
         batch.setColor(1, 1, 1, 1);
@@ -413,8 +479,8 @@ public class GraphView extends BaseView implements Disposable {
                         batch.setColor(1, 1, 1,
                                 (float) (1 - t));
                     }
-                    j.animationFrames = myGame.coin.draw((int) (state.get(j.wasOn).x+this.x),
-                            (int) (state.get(j.wasOn).y+this.y),
+                    j.animationFrames = myGame.coin.draw((int) (state.get(j.wasOn).x + this.x),
+                            (int) (state.get(j.wasOn).y + this.y),
                             j.animationFrames, false);
                 } else {
                     if (newState.get(j.wasOn).x != -1 && prevState.get(j.willBeOn).x != -1) {
@@ -442,6 +508,7 @@ public class GraphView extends BaseView implements Disposable {
         }
         this.v = v;
         chosen = -1;
+        angle = -10;
         getNewGraph();
         updating = true;
         timeUpdateStart = millis();
@@ -468,8 +535,10 @@ public class GraphView extends BaseView implements Disposable {
 
     @Override
     public void dispose() {
-        texture.dispose();
-        canvas.dispose();
+        if(texture!=null) {
+            texture.dispose();
+        }
+        if(canvas!=null)canvas.dispose();
     }
 
     public interface OnCollide {

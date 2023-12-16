@@ -139,7 +139,7 @@ public class Graph {
         characters.get(GameSettings.startV).add(player);
         int v = (int)(random.nextDouble()*(this.n*this.m-1))+1;
         characters.get(v).add(new GraphSmartEnemy(v,
-                difficulty.enemySpeed * (0.7+0.6*random.nextDouble()),
+                difficulty.enemySpeed,
                 this, false, nextId++, (int)(Math.random()*GameSettings.enemyAnimationCount)));
         for(int i = 0; i < difficulty.coinCount; i++){
             spawnCoin();

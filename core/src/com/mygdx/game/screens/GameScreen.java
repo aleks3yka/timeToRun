@@ -48,6 +48,7 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         SoundsHelper.stopBackMenuSound();
         SoundsHelper.playBackGameSound();
+        SoundsHelper.setVolume(MemoryHelper.loadVolume());
         if(graphView != null){
             graphView.dispose();
         }
@@ -66,7 +67,7 @@ public class GameScreen extends ScreenAdapter {
         view.add(new LabelView(1405, 850, "000000",
                 false, myGame.normalFont, myGame.batch));
         final int bestScore = MemoryHelper.loadBestScore();
-        view.add(new LabelView(20, 850, bestScore/100000%10 + "" + bestScore/10000%10
+        view.add(new LabelView(10, 850, bestScore/100000%10 + "" + bestScore/10000%10
                 + "" + bestScore/1000%10
                 + "" + bestScore/100%10
                 + "" + bestScore/10%10
@@ -105,7 +106,6 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
-        SoundsHelper.stopBackGameSound();
         Gdx.input.setInputProcessor(null);
     }
 
