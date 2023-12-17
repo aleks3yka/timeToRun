@@ -79,7 +79,7 @@ public class MyGdxGame extends Game {
         normalFont = FontHelper.getFont(50, font, Color.WHITE);
         bigFont = FontHelper.getFont(100, font, Color.WHITE);
         accentFont = FontHelper.getFont(50, font, Color.LIGHT_GRAY);
-        setScreen(splashScreen);
+        setScreen(menuScreen);
 //        player = VideoPlayerCreator.createVideoPlayer();
 //        FileHandle file = Gdx.files.internal("LOGO.webm");
 //        try {
